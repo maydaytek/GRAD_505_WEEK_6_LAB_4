@@ -1,0 +1,147 @@
+﻿<!DOCTYPE html>
+<html><head></head><body style="color: rgb(32, 33, 34); font-family: verdana, sans-serif; font-size: 19px;"><h1 id="risk-assessment-in-food-science">Risk Assessment in Food Science</h1>
+<h2 id="lab-requirements">Lab Requirements</h2>
+<p>All datasets below are available in <a href="/d2l/common/dialogs/quickLink/quickLink.d2l?ou=1565127&amp;type=content&amp;rcode=354644E0-4CD8-419D-A32F-4E78D8778E5C-9665655" target="_blank" rel="noopener">Week 6: Hands-on Experience with Data Science Tools</a>.</p>
+<ol>
+<li>Consumption data: <a href="/d2l/common/dialogs/quickLink/quickLink.d2l?ou=1565127&amp;type=content&amp;rcode=354644E0-4CD8-419D-A32F-4E78D8778E5C-10037164" target="_blank" rel="noopener">Lab 4 Resource - Consumption Data</a></li>
+<li>Pesticide Residual data: <a href="/d2l/common/dialogs/quickLink/quickLink.d2l?ou=1565127&amp;type=content&amp;rcode=354644E0-4CD8-419D-A32F-4E78D8778E5C-10037167" target="_blank" rel="noopener">Lab 4 Resource - Pesticide Residue Data</a></li>
+<li>Lethal Dose 50% (LD<sub>50</sub>) data: <a href="/d2l/common/dialogs/quickLink/quickLink.d2l?ou=1565127&amp;type=content&amp;rcode=354644E0-4CD8-419D-A32F-4E78D8778E5C-10037168" target="_blank" rel="noopener">Lab 4 Resource - LD50</a></li>
+</ol>
+<p>The Consumption file (Consumption.xlsx) contains data on the eating habits of individuals along with information on their sex, mass, and age. This data file was obtained from a translated national food consumption data survey conducted by the Institute of Nutrition, Mahidol University, Thailand. The data was collected between March 2014 and April 2015 with three rounds to cover seasonal variation of food consumption. Participants came from 16 provinces from Thailand and the Bangkok metropolitan.</p>
+<p>The Pesticide Residual file (Pesticide Residue.xlsx) has data on the amount of pesticides that were found on cabbage and Chinese kale that were bought from a market and then tested. The residue data comes from two studies that are also included in this lab module for reference (Wanwimolruk et al. 2015, Wanwimolruk et al. 2017).</p>
+<p>The provided table LD50.xlsx lists LD<sub>50</sub> values (Lethal Dose 50%) for five pesticides, which indicate their acute toxicity (short-term poisoning potential).</p>
+<p><em>What is LD<sub>50</sub>?</em></p>
+<p>Definition: LD<sub>50</sub> is the amount of a substance required to kill 50% of a test population (usually rodents like rats or mice) under controlled conditions. It is a standard measure of acute toxicity, expressed in milligrams of pesticide per kilogram of body weight (mg/kg).</p>
+<p><em>How to Interpret LD<sub>50</sub> Values?</em></p>
+<ul>
+<li>Lower LD<sub>50</sub> values = Higher toxicity (e.g., Malathion: 0.0003 mg/kg is extremely toxic).</li>
+<li>Higher LD<sub>50</sub> values = Lower toxicity (e.g., Dichlorvos: 0.0339 mg/kg is less toxic than Malathion but still highly dangerous)</li>
+</ul>
+<h2>Introduction</h2>
+<p>During this lab, we will merge these three datasets into a single document to perform future analysis. Before beginning the lab, start thinking about the questions we may want to answer.</p>
+<p>For example, one question might be: "Is there a group (e.g., <span style="font-family: 'courier new', courier, sans-serif;">Age</span>, <span style="font-family: 'courier new', courier, sans-serif;">Sex</span>, <span style="font-family: 'courier new', courier, sans-serif;">Sex_Age_class</span>) at a higher risk to pesticide exposure? Does this depend on the type of vegetable?"</p>
+<p>A testable hypothesis for this question could be: "The youngest ages are at the highest risk to pesticide exposure."</p>
+<p>First, risk can be quantified as the sum of the products of individual exposures and toxicities:</p>
+<p><math title="" xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mstyle>
+  <mi>R</mi>
+  <mi>i</mi>
+  <mi>s</mi>
+  <mi>k</mi>
+  <mo>=</mo>
+  <munderover>
+    <mo data-mjx-texclass="OP">∑</mo>
+    <mrow data-mjx-texclass="ORD">
+      <mi>k</mi>
+      <mo>=</mo>
+      <mn>1</mn>
+    </mrow>
+    <mi>n</mi>
+  </munderover>
+  <mi>e</mi>
+  <mi>x</mi>
+  <mi>p</mi>
+  <mi>o</mi>
+  <mi>s</mi>
+  <mi>u</mi>
+  <mi>r</mi>
+  <msub>
+    <mi>e</mi>
+    <mi>k</mi>
+  </msub>
+  <mo>×</mo>
+  <mi>t</mi>
+  <mi>o</mi>
+  <mi>x</mi>
+  <mi>i</mi>
+  <mi>c</mi>
+  <mi>i</mi>
+  <mi>t</mi>
+  <msub>
+    <mi>y</mi>
+    <mi>k</mi>
+  </msub>
+</mstyle><annotation encoding="latex" data-d2l-attr-encoding="latex">{"version":"1.1","math":"$$Risk = \sum_{k=1}^n exposure_k \times toxicity_k $$"}</annotation></semantics></math>where <code>n</code> here is the number of pesticides exposed to.</p>
+<p>This equation is a specific example of a very general equation in risk analysis and cost-benefit analysis. The next time you are faced with making a decision based upon the potential positive and negative effects of the choices you make, you could employ this. This would simply be the sum of the products of the likelihood of an effect happening and the "goodness" (positive) or "badness" (negative) of those outcomes should they happen.</p>
+<p><img src="/content/enforced/1149187-dev_grad_505_foundations_in_data_science/330px-Gailan.jpg" alt="Chinese Kale" title="Chinese Kale" data-d2l-editor-default-img-style="true" style="max-width: 100%;"><br><em>(Chinese kale from <a href="https://en.wikipedia.org/wiki/Gai_lan" target="_blank" rel="noopener">Wikipedia</a>)</em></p>
+<p>The exposure of each test subject (our study replicates are individual people) will depend upon how much pesticide remains on different foods and how much of that food they eat:</p>
+<p><math title="" xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mstyle>
+  <mi>e</mi>
+  <mi>x</mi>
+  <mi>p</mi>
+  <mi>o</mi>
+  <mi>s</mi>
+  <mi>u</mi>
+  <mi>r</mi>
+  <mi>e</mi>
+  <mo>=</mo>
+  <munderover>
+    <mo data-mjx-texclass="OP">∑</mo>
+    <mrow data-mjx-texclass="ORD">
+      <mrow data-mjx-texclass="ORD">
+        <mn>1</mn>
+      </mrow>
+    </mrow>
+    <mi>f</mi>
+  </munderover>
+  <munderover>
+    <mo data-mjx-texclass="OP">∑</mo>
+    <mrow data-mjx-texclass="ORD">
+      <mrow data-mjx-texclass="ORD">
+        <mn>1</mn>
+      </mrow>
+    </mrow>
+    <mi>p</mi>
+  </munderover>
+  <mi>f</mi>
+  <mi>o</mi>
+  <mi>o</mi>
+  <msub>
+    <mi>d</mi>
+    <mi>f</mi>
+  </msub>
+  <mo>×</mo>
+  <mi>p</mi>
+  <mi>e</mi>
+  <mi>s</mi>
+  <mi>t</mi>
+  <mi>i</mi>
+  <mi>c</mi>
+  <mi>i</mi>
+  <mi>d</mi>
+  <mi>e</mi>
+  <msub>
+    <mi>s</mi>
+    <mi>p</mi>
+  </msub>
+</mstyle><annotation encoding="latex" data-d2l-attr-encoding="latex">{"version":"1.1","math":"$$exposure = \sum_{1}^f \sum_{1}^p food_f \times pesticides_p $$"}</annotation></semantics></math>This equation simply means there may be many foods eaten and each food may have many different pesticides on it.</p>
+<blockquote>
+<p>Open the Consumption.xlsx file. This gives the amount (mass) of cabbage and Chinese Kale eaten by each subject (so&nbsp;<code>f=2</code>) within a certain period.</p>
+<p>The residue data (Pesticide Residue.xlsx) has information on the amount of each type of pesticide on cabbage and Chinese Kale. Therefore, we will simply combine the data from these two files to be able to calculate the total exposure of each test subject.</p>
+</blockquote>
+<p>One very important consideration is&nbsp;<strong>units</strong>. A numeral without a unit is almost always a useless datum. The metadata (embedded in the table or listed as a README sheet in the Consumption.xlsx case) should include information on the units for all variables. It may be helpful to include units in the variable names where a given unit is not very standard (e.g., pH). Never vary the units within a single variable/column. We need to ensure before calculating exposure that the amount of food and the amount of pesticide are using the same units.</p>
+<blockquote>
+<p>Examine the metadata or README to ensure that the units match. We will need to get these values into the same units before taking their product. But first, we need to calculate how much is eaten over a given period. The frequency column in the consumption data has units of month<sup>-1</sup>. We will calculate the risk on a monthly basis. Because the data on the amount eaten of each type of produce is given in grams, we will begin with grams and then convert as necessary. Begin by making a new column that is the product between frequency and consumption. Name this column "Amount_Eaten".</p>
+</blockquote>
+<p>We will use the Lethal Dose 50 LD<sub>50</sub> (same units as pesticide residuals) values of the different organophosphate-based pesticides as a measure of their relative toxicities. LD<sub>50</sub> is a standard measure used in toxicology to indicate the dose of a substance that is required to kill 50% of a test population. Because we must sum across these in the risk calculation, having these values in the equation puts the resulting exposure values on the same scale.</p>
+<p>Follow these steps:</p>
+<ol>
+<li><strong>Calculate pesticide residual mean in <em>Pesticide Residue.xlsx</em>:<br><br></strong>Calculate the mean amount of each of the pesticides (those listed at the top of the tables) for Chinese<em> </em>kale<em> </em>(in sheet 2015-Paper) and cabbage (in sheet 2017-Paper). Put the results at the bottom of the tables. Make sure to track the units! <br><br><em>Note: We have included examples for both the first and last pesticides for Chinese kale&nbsp;(in sheet 2015-Paper).</em><br><br></li>
+<li><strong>Create a simplified version of pesticide residual file:<br></strong><br>Save the updated&nbsp;<em>Pesticide Residue.xlsx</em>&nbsp;file with the newly added mean values. Then, create a copy of this file and name it&nbsp;<em>Pesticide Residue_Subset.xlsx</em>.<br><br>To simplify calculations, we will now focus only on major pesticides that are listed in the LD<sub>50</sub> table (LD50.xlsx). In Pesticide Residue_Subset.xlsx:<br><br>- In the&nbsp;<em>2015-Paper</em> sheet, retain only the pesticide columns for Diazinon, Dimethoate, Malathion, and Profenofos, and remove all other pesticide columns. <em>Note that Dichlorvos is not present in this sheet.</em><br>- In the&nbsp;<em>2017-Paper</em> sheet, keep only the pesticide columns for Diazinon, Dichlorvos, and Dimethoate, deleting all others. <em>Note that Malathion and Profenofos are not present in this sheet.</em><br><br>For all subsequent steps, work with&nbsp;<em>Pesticide Residue_Subset.xlsx</em>&nbsp;instead of&nbsp;<em>Pesticide Residue.xlsx</em>.<br><br></li>
+<li><strong>Produce revised consumption sheet for merging:<br><br></strong>Produce a new sheet in the Consumption.xlsx file and rename the sheet "revised". Copy and paste columns for ID, Sex, Age, Age_class, Sex_Age_class, body weight, and the two columns (amount eaten and frequency) for each vegetable of interest (cabbage and Chinese kale).<br><br><em>Note: To help you proceed, we have set the sheet "revised" and included the header line and one row of data for you.<br><br></em></li>
+<li><strong>Copy values from&nbsp;<em>Pesticide Residue_Subset.xlsx</em><em>&nbsp;</em>to revised sheet:<br></strong><br>In the revised consumption sheet, add a separate column for each pesticide-vegetable combination. Populate these columns with the mean concentration of each pesticide found in the two vegetables of interest. Name the columns using the format "Mean Concentration_<em>[pesticide]_[vegetable]</em>", e.g., "Mean Concentration_Diazinon_Chinese Kale" (or if you would like, you may use a shortened format like "MC_Diazinon_CK").<br><br><em>Note: We will create 7 new columns (4 for Chinese kale and 3 for cabbage) in this step. Each of these columns will be filled vertically with the same value. The pesticide residual sheets (2015-Paper and 2017-Paper) are specific for each vegetable (Chinese kale and cabbage). You may use the metadata in the sheets to determine which sheet corresponds to each vegetable. You may use different colors to highlight groups of columns, making it easier to locate them later.</em><br><br><strong></strong></li>
+<li><strong>Add LD<sub>50</sub>:<br><br></strong>In the revised consumption sheet, add a new column for each pesticide of interest and populate it with the corresponding LD<sub>50</sub> values (they are in the same unit as pesticide residuals) listed in the LD<sub>50</sub> table (LD50.xlsx). These values represent the lethal dose required to kill half of the test subjects; note that humans were not used in these tests. We will use the LD<sub>50</sub> as a relative potency factor (RPF). Name these columns "RPF_<em>[pesticide]</em>" (e.g.,&nbsp;"RPF_Diazinon"). Each column will contain the same LD<sub>50</sub> value for all rows.<br><br><em>Note: The Relative Potency Factor (RPF) is a scaling factor used to compare the toxicity of different chemicals, typically pesticides or contaminants, relative to a reference compound. It is commonly used in cumulative risk assessment when multiple chemicals share a common mechanism of toxicity.<br><br>Note: Alternatively, you may create seven new columns in a similar manner to Step 5. Regardless of the approach, ensure that the correct columns are used in subsequent computations.</em><br><br></li>
+<li><strong>Calculate Toxicity Exposure Ratio (TER):<br></strong><br>The TER must be calculated for each pesticide: TER = Mean Pesticide Residue Detected × LD<sub>50</sub>&nbsp;<br><br>To do this, multiply the mean pesticide residual by the corresponding LD<sub>50</sub> value. Create and label the resulting columns with "TER_<em>[pesticide]</em>_<em>[vegetable]</em>".<br><br></li>
+<li><strong>Sum exposure of all pesticides:<br></strong><br>Exposure must be calculated separately for each pesticide using the following formula:
+<p style="text-align: center;">exposure = (TER × amount eaten)/body weight.</p>
+To implement this, create new columns representing the individual exposure values for each pesticide. Populate these columns by multiplying the Toxicity Exposure Ratio (TER) by the amount consumed and dividing the result by the subject's body weight. Label the resulting columns with "EXP_<em>[pesticide]</em>_<em>[vegetable]</em>".<br><strong><br></strong></li>
+<li><strong>Summarizing exposure:<br></strong><br>Individual exposure includes exposure from all pesticides. To estimate this, sum horizontally across the values from the previous step for each vegetable of interest. This represents a <strong>total monthly risk value</strong> for the test subject. It accounts for the mass of the subject because dose is relative to size.&nbsp;Label the resulting columns with "SUM_EXP_<em>[vegetable]</em>".<br><br><em>Note: We will create 2 new columns in this step.</em><br><strong><br></strong></li>
+<li><strong>Relative exposure - Compare to standard<br><br></strong>The exposure must be compared to a known standard in order to calculate the relative effect by age, sex, or class.&nbsp;<br><br>The reference dose for Disulfoton is&nbsp;<strong>0.0025 mg/kg/day</strong> based on U.S. EPA’s guidelines. The reference dose is an estimate (with uncertainty spanning perhaps an order of magnitude) of a daily oral exposure to the human population (including sensitive subgroups) that is likely to be without an appreciable risk of deleterious effects during a lifetime.&nbsp;<br><br>We will compare the calculated exposure to the reference dose of Disulfoton to convert each exposure value to a percentage value indicating the relative exporsure.&nbsp;For example, if the exposure you calculated is&nbsp;<strong>0.00018mg/kg/day</strong>&nbsp;for your target population group, then you will divide the exposure by&nbsp;<strong>0.0025mg/kg/day</strong>, which is&nbsp;<strong>7.2%</strong>. That means the cumulative exposure of this pesticide group did not exceed the reference dose, and it is unlikely to produce the adverse effect to this target population group.</li>
+</ol>
+<ol></ol>
+<ol></ol>
+<h2 id="questions">Questions</h2>
+<ol>
+<li>Which group is most at risk? With the risk values you have calculated for each test subject you can now answer some questions about that risk.&nbsp; Calculate the mean and standard deviation of the risk. There is much variation in risk.</li>
+<li>Could sex and age class of the test subjects be part of the reason for this variation, i.e., if all subject were the same sex and same age, would the variation be greater or lesser than is present with this current data?</li>
+<li>Calculate the mean risk within each of the eight groups. Which group is most at risk?</li>
+</ol></body></html>
